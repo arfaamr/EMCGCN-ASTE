@@ -148,7 +148,7 @@ class EMCGCN(torch.nn.Module):
                 GraphConvLayer(args.device, args.gcn_dim, 5*args.class_num, args.class_num, args.pooling))
 
     def forward(self, tokens, masks, word_pair_position, word_pair_deprel, word_pair_pos, word_pair_synpost):
-        bert_feature, _ = self.bert(tokens, masks)
+        bert_feature, _ = self.bert(tokens, masks, return_dict=False)       #* added return_dict=False to work with transformers v4 instead of v3
         bert_feature = self.dropout_output(bert_feature) 
 
         batch, seq = masks.shape
