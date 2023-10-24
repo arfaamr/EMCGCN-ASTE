@@ -82,7 +82,7 @@ def train(args):
     optimizer = get_bert_optimizer(model, args)
 
     # label = ['N', 'B-A', 'I-A', 'A', 'B-O', 'I-O', 'O', 'negative', 'neutral', 'positive']
-    weight = torch.tensor([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0]).float().cuda()
+    weight = torch.tensor([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0]).float()               # rem .cuda()
 
     best_joint_f1 = 0
     best_joint_epoch = 0
@@ -207,8 +207,8 @@ if __name__ == '__main__':
                         help='dataset')
     parser.add_argument('--max_sequence_len', type=int, default=102,
                         help='max length of a sentence')
-    parser.add_argument('--device', type=str, default="cuda",
-                        help='gpu or cpu')
+    parser.add_argument('--device', type=str, default="cpu",
+                        help='gpu or cpu')                              # default cuda to cpu
 
     parser.add_argument('--bert_model_path', type=str,
                         default="bert-base-uncased",
@@ -242,7 +242,7 @@ if __name__ == '__main__':
         random.seed(args.seed)
         np.random.seed(args.seed)
         torch.manual_seed(args.seed)
-        torch.cuda.manual_seed(args.seed)
+        #torch.cuda.manual_seed(args.seed)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
