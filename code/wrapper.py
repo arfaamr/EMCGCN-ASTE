@@ -7,7 +7,11 @@ import numpy as np
 from random import random
 import re
 import pandas as pd
+import nltk
 
+import stanza
+stanza.download('en')
+nlp = stanza.Pipeline('en')
 
 #from cmn.review import Review
 
@@ -56,7 +60,7 @@ def get_aos_augmented(review):
 #? how do i generate postag, etc?       // see data.py, create instance and use functions to generate postag etc. or see nltk library
 #? what exactly does aos() return? just [a,o,s] as expected?    see txt, returns similar list. [(a,o,s), (a,o,s)] --> multiple if review has multiple aspects etc.
 #? difference between elements in triples?                      see above
-#? "push and update emc baseline" -- what exactly do i need done? just wrapper or whole integration with lady?      --> just finish wrapper - ask fani to make fork of emc in fanis lab so i can push to it, or he can just get wrapper from me.
+#? "push and update emc baseline" -- what exactly do i need done? just wrapper or whole integration with lady?      --> just finish wrapper - ask drfani to make fork of emc in fanis lab so i can push to it, or he can just get wrapper from me.
 
 def preprocess(org_reviews, is_test, lang, fname):
     reviews_list = []
@@ -67,7 +71,7 @@ def preprocess(org_reviews, is_test, lang, fname):
         r_dict = {"id": review_info["id"],
                 "sentence": review_info["text"],
                 "triples": []
-        }   #todo: finish triples, add postag, head, deprel
+        }
         
         for j, aos in enumerate(review_info["aos"]): 
             triple = dict.fromkeys(["uid", "sentiment", "target_tags", "opinion_tags"])   
@@ -92,7 +96,20 @@ def preprocess(org_reviews, is_test, lang, fname):
 
             r_dict["triples"].append(triple)
 
-        #postag, head, deprel
+        #data.py/Instance gens deprel, postag, etc in init (?)
+        #r_instance = Instance()
+
+        #..try nltk instead
+        postag_pairs = nltk.pos_tag(review_info["sentences"])
+        postags = [postag_pair[1] for postag_pair in postag_pairs]
+        r_dict["postag"] = postags
+
+        #using stanza -- idk ? https://towardsdatascience.com/natural-language-processing-dependency-parsing-cf094bbbe3f7
+        doc = nlp(review_info["sentences"])
+        r_dict["deprel"] = doc["deprel"]
+        r_dict["head"] = doc["head"]
+
+        
 
         reviews_list.append(r_dict)
         
@@ -102,7 +119,7 @@ def preprocess(org_reviews, is_test, lang, fname):
 
 
 
-#! modify this to look like emc's jsons 
+#! modify this to look like emc's jsons ..^
 """
 def preprocess(org_reviews, is_test, lang):
     reviews_list = []
