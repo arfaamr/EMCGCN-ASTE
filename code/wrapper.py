@@ -114,8 +114,11 @@ def preprocess(org_reviews, is_test, lang, fname):
         reviews_list.append(r_dict)
         
     reviews_json = json.dumps(reviews_list)             #json of list of dicts [one per review] to be written to json file
+    return reviews_json
+
+def writeToJSON(dct, fname):
     with open(f'../output/{fname}.json', 'w') as fp:
-        json.dump(reviews_json, fp)
+        json.dump(dct, fp)
 
 
 
@@ -193,16 +196,19 @@ def main(args):
     output_path = f'{args.output}/{args.dname}'
     print(output_path)
     # if not os.path.isdir(output_path): os.makedirs(output_path)
-    org_reviews, splits = load(args.reviews, args.splits)               #? so run wrapper.py with paths for reviews pkl and splits json in args? what is the path? some pkls in toy.. -- toy reviews.pkl
+    org_reviews, splits = load(args.reviews, args.splits)
 
     test = np.array(org_reviews)[splits['test']].tolist()
-    _, labels = preprocess(test, True, args.lang)
+    test = preprocess(test, True, args.lang)
+    writeToJSON(train, "train")
     for h in range(0, 101, 10):
         hp = h / 100
 
         for f in range(5):
-            train, _ = preprocess(np.array(org_reviews)[splits['folds'][str(f)]['train']].tolist(), False, args.lang)       #!no longer returning, so modify + param for fname [fname would be f"train{f}.json", etc]
-            dev, _ = preprocess(np.array(org_reviews)[splits['folds'][str(f)]['valid']].tolist(), False, args.lang)
+            train = preprocess(np.array(org_reviews)[splits['folds'][str(f)]['train']].tolist(), False, args.lang)       
+            writeToJSON(train, f"train{f}")
+            dev = preprocess(np.array(org_reviews)[splits['folds'][str(f)]['valid']].tolist(), False, args.lang, f"dev{f}")
+            writeToJSON(dev, f"dev{f}")
             path = f'{output_path}-fold-{f}-latency-{h}'
             if not os.path.isdir(path): os.makedirs(path)
 
