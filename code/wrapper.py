@@ -13,7 +13,7 @@ import stanza
 stanza.download('en')
 nlp = stanza.Pipeline('en')
 
-#from cmn.review import Review
+from review import Review
 
 #* read pickle of review objs 
 #* for fold i in splits, write corresponding reviews to test, valid, f{i}_train jsons ? so these jsons can be used by emc -- converts lady dataset into form readable by emc, so we can run emc from lady
@@ -190,7 +190,6 @@ def preprocess(org_reviews, is_test, lang):
     return reviews_list, label_list
 """
 
-
 # python main.py -ds_name [YOUR_DATASET_NAME] -sgd_lr [YOUR_LEARNING_RATE_FOR_SGD] -win [YOUR_WINDOW_SIZE] -optimizer [YOUR_OPTIMIZER] -rnn_type [LSTM|GRU] -attention_type [bilinear|concat]
 def main(args):
     output_path = f'{args.output}/{args.dname}'
@@ -209,30 +208,21 @@ def main(args):
             writeToJSON(train, f"train{f}")
             dev = preprocess(np.array(org_reviews)[splits['folds'][str(f)]['valid']].tolist(), False, args.lang, f"dev{f}")
             writeToJSON(dev, f"dev{f}")
-            path = f'{output_path}-fold-{f}-latency-{h}'
-            if not os.path.isdir(path): os.makedirs(path)
 
-            with open(f'{path}/dev.txt', 'w', encoding='utf-8') as file:
-                for d in dev:
-                    file.write(d + '\n')
+            #? what is this for
+            #test_hidden = []
+            #for t in range(len(test)):
+            #    if random() < hp:
+            #        test_hidden.append(test[t].hide_aspects(mask="z", mask_size=5))
+            #    else:
+            #        test_hidden.append(test[t])
+            #preprocessed_test, _ = preprocess(test_hidden, True, args.lang)
+            #
+            #with open(f'{path}/test.txt', 'w', encoding='utf-8') as file:
+            #    for d in preprocessed_test:
+            #        file.write(d + '\n')
 
-            with open(f'{path}/train.txt', 'w', encoding='utf-8') as file:
-                for d in train:
-                    file.write(d + '\n')
-
-            test_hidden = []
-            for t in range(len(test)):
-                if random() < hp:
-                    test_hidden.append(test[t].hide_aspects(mask="z", mask_size=5))
-                else:
-                    test_hidden.append(test[t])
-            preprocessed_test, _ = preprocess(test_hidden, True, args.lang)
-
-            with open(f'{path}/test.txt', 'w', encoding='utf-8') as file:
-                for d in preprocessed_test:
-                    file.write(d + '\n')
-
-            pd.to_pickle(labels, f'{path}/test-labels.pk')
+            #pd.to_pickle(labels, f'{path}/test-labels.pk')
             # with open(f'{path}/test-labels.txt', 'w', encoding='utf-8') as file:
             #     for label in labels:
             #         for l in label:
@@ -262,7 +252,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='EMC Wrapper')
     parser.add_argument('--dname', dest='dname', type=str, default='16semeval_rest')
     parser.add_argument('--reviews', dest='reviews', type=str,
-                        default='reviews.pkl',                                             
+                        default='reviews.pkl',                                                                                  
                         help='raw dataset file path')
     parser.add_argument('--splits', dest='splits', type=str,
                         default='splits.json',
@@ -273,12 +263,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     for dataset in ['SemEval14L']:  # 'SemEval14L', 'SemEval14R', '2015SB12', '2016SB5'     #? should this be args.dname ?
-        args.splits = f'data/{dataset}/splits.json'
+        args.splits = "splits.json"
         for lang in ['eng', 'spa_Latn', 'pes_Arab.zho_Hans.deu_Latn.arb_Arab.fra_Latn.spa_Latn']:
             if lang == 'eng':
                 args.lang = lang
                 args.dname = f'{dataset}'
-                args.reviews = f'data/{dataset}/reviews.pkl'
+                args.reviews = 'reviews.pkl'
             else:
                 args.lang = lang
                 args.dname = f'{dataset}-{lang}'
